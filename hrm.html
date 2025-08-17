@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ERP HRM Module - Working</title>
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+  // Check if user is logged in
+  const session = JSON.parse(localStorage.getItem('um_session_v1'));
+  if(!session){
+    alert("You must login first!");
+    window.location.href = "login.html"; // redirect to login page
+  }
+  <script>
+  const mobileBtn = document.getElementById("mobileBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+
+  mobileBtn.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
+  });
+
+  // Optional: close menu when clicking outside
+  window.addEventListener("click", (e) => {
+    if (!mobileMenu.contains(e.target) && !mobileBtn.contains(e.target)) {
+      mobileMenu.classList.add("hidden");
+    }
+  });
+</script>
+</script>
+
+  <style>
+    :root { --brand:#2563eb }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: linear-gradient(120deg,#e6f0ff,#f7fbff);
+      padding-top: 140px; /* ensure content not hidden behind navbar */
+    }
+    .glass { background: rgba(255,255,255,0.8); backdrop-filter: blur(6px) }
+    .nav-btn { transition: all .18s ease }
+    .nav-btn:hover { transform: translateY(-3px) }
+  </style>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body class="min-h-screen">
+
+<!-- NAVBAR -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#2C3E50] rounded-b-2xl shadow">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+
+    <!-- Heading Centered -->
+    <div class="flex items-center justify-center">
+      <div class="text-lg font-semibold text-white">
+        ERP
+      </div>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="hidden sm:flex justify-center gap-5 mt-4">
+      <a href="index.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition-colors">Dashboard</a>
+      <a href="home.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition-colors">Home</a>
+      <a href="invontery.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition-colors">Inventory</a>
+      <a href="sales.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition-colors">Sales</a>
+      <a href="hrm.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition-colors">HRM</a>
+      <a href="contact.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition-colors">Contact</a>
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <div class="sm:hidden flex justify-end mt-2">
+      <button id="mobileBtn" class="p-2 rounded-md text-white hover:bg-gray-700 focus:outline-none">
+        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" 
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden sm:hidden bg-[#2C3E50] flex-col p-4 gap-2 absolute right-4 top-14 rounded-lg shadow-md">
+      <a href="home.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">Home</a>
+      <a href="invontery.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">Inventory</a>
+      <a href="sales.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">Sales</a>
+      <a href="hrm.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">HRM</a>
+      <a href="contact.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">Contact</a>
+    </div>
+
+  
+ 
+</header>
+
+
+
+
+
+
+
+
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- HERO -->
+    <section class="glass p-6 rounded-2xl shadow mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-800">HRM Module - Working Demo</h1>
+          <p class="text-slate-600 mt-1">Employee registration, attendance (manual + CSV), payroll, reports, real-time stats and export features (PDF / Excel).</p>
+        </div>
+        <div class="flex gap-2">
+          <button id="seedDemoBtn" class="px-4 py-2 rounded-xl border bg-white text-slate-700">Seed Demo</button>
+          <button id="resetBtn" class="px-4 py-2 rounded-xl bg-red-600 text-white">Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD STATS -->
+    <section id="dashboard" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="glass p-4 rounded-xl text-center shadow">
+        <div class="text-sm text-slate-500">Total Employees</div>
+        <div id="statEmployees" class="text-2xl font-bold text-slate-800 mt-1">0</div>
+      </div>
+      <div class="glass p-4 rounded-xl text-center shadow">
+        <div class="text-sm text-slate-500">Present Today</div>
+        <div id="statPresent" class="text-2xl font-bold text-slate-800 mt-1">0</div>
+      </div>
+      <div class="glass p-4 rounded-xl text-center shadow">
+        <div class="text-sm text-slate-500">Salary Payout (Month)</div>
+        <div id="statPayout" class="text-2xl font-bold text-slate-800 mt-1">PKR 0</div>
+      </div>
+      <div class="glass p-4 rounded-xl text-center shadow">
+        <div class="text-sm text-slate-500">Sales vs Inventory</div>
+        <div id="statIndex" class="text-2xl font-bold text-slate-800 mt-1">0%</div>
+      </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+      <div class="glass p-4 rounded-xl lg:col-span-2 shadow">
+        <h3 class="font-semibold text-slate-800">Attendance Trend (30 days)</h3>
+        <canvas id="attendanceChart" height="110"></canvas>
+      </div>
+      <div class="glass p-4 rounded-xl shadow">
+        <h3 class="font-semibold text-slate-800">Sales vs Inventory</h3>
+        <canvas id="salesInvChart" height="110"></canvas>
+      </div>
+    </section>
+
+    <!-- EMPLOYEE SECTION -->
+    <section id="employees" class="mb-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <form id="employeeForm" class="glass p-4 rounded-xl shadow space-y-3">
+          <h3 class="font-semibold text-slate-800">Add Employee</h3>
+          <input class="border rounded-xl px-3 py-2 w-full" name="name" placeholder="Full name" required />
+          <input class="border rounded-xl px-3 py-2 w-full" name="email" type="email" placeholder="Email" required />
+          <input class="border rounded-xl px-3 py-2 w-full" name="phone" placeholder="Phone" />
+          <select name="department" class="border rounded-xl px-3 py-2 w-full">
+            <option>HR</option><option>Sales</option><option>Inventory</option><option>Tech</option><option>Finance</option>
+          </select>
+          <input class="border rounded-xl px-3 py-2 w-full" name="role" placeholder="Role" />
+          <input class="border rounded-xl px-3 py-2 w-full" name="salary" type="number" placeholder="Base Salary" />
+          <div class="flex gap-2">
+            <button class="px-4 py-2 rounded-xl bg-blue-600 text-white" type="submit">Add</button>
+            <button type="reset" class="px-4 py-2 rounded-xl border bg-white">Clear</button>
+          </div>
+        </form>
+
+        <div class="lg:col-span-2 glass p-4 rounded-xl shadow">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-slate-800">Employees</h3>
+            <div class="flex gap-2">
+              <input id="employeeSearch" class="border rounded-xl px-3 py-2" placeholder="Search..." />
+              <button class="px-3 py-2 rounded-xl border" onclick="exportTableTo('employees','excel')">Excel</button>
+              <button class="px-3 py-2 rounded-xl border" onclick="exportTableTo('employees','pdf')">PDF</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-xl" id="employeesTable">
+              <thead><tr class="bg-slate-50"><th class="p-2">#</th><th class="p-2">Name</th><th class="p-2">Email</th><th class="p-2">Dept</th><th class="p-2">Role</th><th class="p-2">Salary</th><th class="p-2">Actions</th></tr></thead>
+              <tbody id="employeesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ATTENDANCE -->
+    <section id="attendance" class="mb-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <form id="attendanceForm" class="glass p-4 rounded-xl shadow space-y-3">
+          <h3 class="font-semibold text-slate-800">Add Attendance</h3>
+          <input type="date" name="date" class="border rounded-xl px-3 py-2 w-full" required />
+          <select id="attendanceEmployee" name="employeeId" class="border rounded-xl px-3 py-2 w-full" required></select>
+          <select name="status" class="border rounded-xl px-3 py-2 w-full">
+            <option>Present</option><option>Absent</option><option>Leave</option>
+          </select>
+          <input name="hours" type="number" class="border rounded-xl px-3 py-2 w-full" placeholder="Hours worked" />
+          <button class="px-4 py-2 rounded-xl bg-blue-600 text-white" type="submit">Add</button>
+          <div>
+            <label class="text-sm text-slate-600">Upload CSV</label>
+            <input id="attendanceCsv" type="file" accept=".csv" class="w-full" />
+            <p class="text-xs text-slate-500">CSV columns: employeeEmail,date(YYYY-MM-DD),status,hours</p>
+          </div>
+        </form>
+
+        <div class="lg:col-span-2 glass p-4 rounded-xl shadow">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-slate-800">Attendance Records</h3>
+            <div class="flex gap-2">
+              <input id="attendanceSearch" class="border rounded-xl px-3 py-2" placeholder="Search..." />
+              <button class="px-3 py-2 rounded-xl border" onclick="exportTableTo('attendance','excel')">Excel</button>
+              <button class="px-3 py-2 rounded-xl border" onclick="exportTableTo('attendance','pdf')">PDF</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table id="attendanceTable" class="min-w-full bg-white rounded-xl"><thead><tr class="bg-slate-50"><th class="p-2">#</th><th class="p-2">Date</th><th class="p-2">Employee</th><th class="p-2">Status</th><th class="p-2">Hours</th><th class="p-2">Actions</th></tr></thead><tbody id="attendanceTbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAYROLL -->
+    <section id="payroll" class="mb-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <form id="payrollForm" class="glass p-4 rounded-xl shadow space-y-3">
+          <h3 class="font-semibold text-slate-800">Generate Payroll</h3>
+          <select id="payrollEmployee" name="employeeId" class="border rounded-xl px-3 py-2 w-full" required></select>
+          <input type="month" name="month" class="border rounded-xl px-3 py-2 w-full" required />
+          <input name="base" type="number" class="border rounded-xl px-3 py-2 w-full" placeholder="Base (auto if blank)" />
+          <input name="bonus" type="number" class="border rounded-xl px-3 py-2 w-full" placeholder="Bonus" value="0" />
+          <input name="deductions" type="number" class="border rounded-xl px-3 py-2 w-full" placeholder="Deductions" value="0" />
+          <div class="grid grid-cols-2 gap-2">
+            <input name="otHours" type="number" class="border rounded-xl px-3 py-2 w-full" placeholder="OT hours" value="0" />
+            <input name="otRate" type="number" class="border rounded-xl px-3 py-2 w-full" placeholder="OT rate" value="0" />
+          </div>
+          <div class="flex gap-2 items-center">
+            <button class="px-4 py-2 rounded-xl bg-blue-600 text-white" type="submit">Calculate & Save</button>
+            <button id="previewNetBtn" type="button" class="px-3 py-2 rounded-xl border">Preview Net</button>
+            <div id="netPreview" class="text-sm text-slate-600"></div>
+          </div>
+        </form>
+
+        <div class="lg:col-span-2 glass p-4 rounded-xl shadow">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-semibold text-slate-800">Payroll History</h3>
+            <div class="flex gap-2">
+              <input id="payrollSearch" class="border rounded-xl px-3 py-2" placeholder="Search..." />
+              <button class="px-3 py-2 rounded-xl border" onclick="exportTableTo('payroll','excel')">Excel</button>
+              <button class="px-3 py-2 rounded-xl border" onclick="exportTableTo('payroll','pdf')">PDF</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table id="payrollTable" class="min-w-full bg-white rounded-xl"><thead><tr class="bg-slate-50"><th class="p-2">#</th><th class="p-2">Employee</th><th class="p-2">Month</th><th class="p-2">Base</th><th class="p-2">Bonus</th><th class="p-2">Deductions</th><th class="p-2">OT</th><th class="p-2">Net</th><th class="p-2">Actions</th></tr></thead><tbody id="payrollTbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section id="reports" class="mb-6">
+      <div class="glass p-4 rounded-xl shadow">
+        <h3 class="font-semibold text-slate-800 mb-2">Reports & Downloads</h3>
+        <p class="text-slate-600 mb-3">Export any table to PDF or Excel. Use combined export for all HR reports.</p>
+        <div class="flex gap-2">
+          <button id="exportAllPdfBtn" class="px-4 py-2 rounded-xl bg-blue-600 text-white">Download Combined PDF</button>
+          <button id="exportAllExcelBtn" class="px-4 py-2 rounded-xl border">Download Combined Excel</button>
+        </div>
+      </div>
+    </section>
+
+   
+    
+
+    <footer class="text-center text-slate-600 pb-10">© <span id="yearNow"></span> ERP HRM Module</footer>
+  </main>
+
+  <script>
+    // ------------------ State ------------------
+    const store = {
+      employees: JSON.parse(localStorage.getItem('hrm_employees')||'[]'),
+      attendance: JSON.parse(localStorage.getItem('hrm_attendance')||'[]'),
+      payroll: JSON.parse(localStorage.getItem('hrm_payroll')||'[]'),
+      salesInv: JSON.parse(localStorage.getItem('hrm_salesInv')||'[]')
+    };
+    const save = ()=>{
+      localStorage.setItem('hrm_employees', JSON.stringify(store.employees));
+      localStorage.setItem('hrm_attendance', JSON.stringify(store.attendance));
+      localStorage.setItem('hrm_payroll', JSON.stringify(store.payroll));
+      localStorage.setItem('hrm_salesInv', JSON.stringify(store.salesInv));
+      renderAll();
+    };
+    const currency = n=>`PKR ${Number(n||0).toLocaleString()}`;
+
+    // Mobile menu
+    mobileBtn.onclick = ()=> mobileMenu.classList.toggle('hidden');
+
+    // ---------- Employees ----------
+    const empForm = document.getElementById('employeeForm');
+    const empTbody = document.getElementById('employeesTbody');
+    empForm.addEventListener('submit', e=>{
+      e.preventDefault();
+      const fd = new FormData(empForm); const obj = Object.fromEntries(fd.entries());
+      obj.id = crypto.randomUUID(); obj.salary = Number(obj.salary||0);
+      store.employees.push(obj); empForm.reset(); save();
+    });
+
+    document.getElementById('employeeSearch').addEventListener('input', renderEmployees);
+
+    function renderEmployees(){
+      const q = document.getElementById('employeeSearch').value.toLowerCase(); empTbody.innerHTML='';
+      store.employees.filter(e=>Object.values(e).join(' ').toLowerCase().includes(q)).forEach((e,i)=>{
+        const tr=document.createElement('tr'); tr.innerHTML=`<td class="p-2">${i+1}</td><td class="p-2 font-medium">${e.name}</td><td class="p-2">${e.email}</td><td class="p-2">${e.department}</td><td class="p-2">${e.role||''}</td><td class="p-2">${currency(e.salary)}</td><td class="p-2"><button class="px-2 py-1 rounded border" onclick="editEmp('${e.id}')">Edit</button> <button class="px-2 py-1 rounded border" onclick="delEmp('${e.id}')">Del</button></td>`;
+        empTbody.appendChild(tr);
+      });
+      // fill selects
+      attendanceEmployee.innerHTML = '<option value="" disabled selected>Select employee</option>'+ store.employees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+      payrollEmployee.innerHTML = attendanceEmployee.innerHTML; payrollEmployee.value='';
+    }
+
+    function editEmp(id){
+      const e = store.employees.find(x=>x.id===id); if(!e) return;
+      empForm.name.value=e.name; empForm.email.value=e.email||''; empForm.phone.value=e.phone||''; empForm.department.value=e.department||'HR'; empForm.role.value=e.role||''; empForm.salary.value=e.salary||0;
+      store.employees = store.employees.filter(x=>x.id!==id); save();
+    }
+    function delEmp(id){ if(!confirm('Delete employee?')) return; store.employees=store.employees.filter(x=>x.id!==id); store.attendance=store.attendance.filter(a=>a.employeeId!==id); store.payroll=store.payroll.filter(p=>p.employeeId!==id); save(); }
+
+    // ---------- Attendance ----------
+    const attForm=document.getElementById('attendanceForm'); const attTbody=document.getElementById('attendanceTbody');
+    attForm.addEventListener('submit', e=>{ e.preventDefault(); const fd=new FormData(attForm); const obj=Object.fromEntries(fd.entries()); obj.id=crypto.randomUUID(); obj.hours=Number(obj.hours||0); store.attendance.push(obj); attForm.reset(); save(); });
+
+    document.getElementById('attendanceCsv').addEventListener('change', ev=>{
+      const file=ev.target.files[0]; if(!file) return; Papa.parse(file,{header:true,skipEmptyLines:true,complete:res=>{res.data.forEach(r=>{ const emp=store.employees.find(e=>e.email===r.employeeEmail); if(!emp) return; store.attendance.push({id:crypto.randomUUID(),date:r.date,employeeId:emp.id,status:r.status,hours:Number(r.hours||0)}); }); save(); ev.target.value=''; }});
+    });
+
+    document.getElementById('attendanceSearch').addEventListener('input', renderAttendance);
+    function renderAttendance(){ const q=document.getElementById('attendanceSearch').value.toLowerCase(); attTbody.innerHTML=''; store.attendance.map(a=>({...a,emp:store.employees.find(e=>e.id===a.employeeId)||{name:'Unknown'}})).filter(x=>(`${x.emp.name} ${x.status} ${x.date}`).toLowerCase().includes(q)).forEach((a,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="p-2">${i+1}</td><td class="p-2">${a.date}</td><td class="p-2 font-medium">${a.emp.name}</td><td class="p-2">${a.status}</td><td class="p-2">${a.hours||0}</td><td class="p-2"><button class="px-2 py-1 rounded border" onclick="delAttendance('${a.id}')">Del</button></td>`; attTbody.appendChild(tr); }); }
+    function delAttendance(id){ if(!confirm('Delete record?')) return; store.attendance=store.attendance.filter(a=>a.id!==id); save(); }
+
+    // ---------- Payroll ----------
+    const payrollForm=document.getElementById('payrollForm'); const payrollTbody=document.getElementById('payrollTbody');
+    payrollForm.addEventListener('submit', e=>{ e.preventDefault(); const fd=new FormData(payrollForm); const obj=Object.fromEntries(fd.entries()); obj.id=crypto.randomUUID(); obj.base=numberOrBase(obj.employeeId,obj.base); obj.bonus=Number(obj.bonus||0); obj.deductions=Number(obj.deductions||0); obj.otHours=Number(obj.otHours||0); obj.otRate=Number(obj.otRate||0); obj.otPay=obj.otHours*obj.otRate; obj.net=obj.base+obj.bonus+obj.otPay-obj.deductions; store.payroll.push(obj); payrollForm.reset(); save(); });
+    function numberOrBase(eid,over){ const emp=store.employees.find(e=>e.id===eid); const v=Number(over); return isNaN(v)||!v?Number(emp?.salary||0):v; }
+    document.getElementById('previewNetBtn').addEventListener('click', ()=>{ const fd=new FormData(payrollForm); const obj=Object.fromEntries(fd.entries()); const base=numberOrBase(obj.employeeId,obj.base); const bonus=Number(obj.bonus||0); const ded=Number(obj.deductions||0); const ot=Number(obj.otHours||0)*Number(obj.otRate||0); const net=base+bonus+ot-ded; document.getElementById('netPreview').textContent=`Net Pay: ${currency(net)}`; });
+    document.getElementById('payrollSearch').addEventListener('input', renderPayroll);
+    function renderPayroll(){ const q=document.getElementById('payrollSearch').value.toLowerCase(); payrollTbody.innerHTML=''; store.payroll.map(p=>({...p,emp:store.employees.find(e=>e.id===p.employeeId)||{name:'Unknown'}})).filter(x=>(`${x.emp.name} ${x.month}`).toLowerCase().includes(q)).forEach((p,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="p-2">${i+1}</td><td class="p-2 font-medium">${p.emp.name}</td><td class="p-2">${p.month}</td><td class="p-2">${currency(p.base)}</td><td class="p-2">${currency(p.bonus)}</td><td class="p-2">${currency(p.deductions)}</td><td class="p-2">${currency(p.otPay)}</td><td class="p-2 font-semibold">${currency(p.net)}</td><td class="p-2"><button class="px-2 py-1 rounded border" onclick="delPayroll('${p.id}')">Del</button></td>`; payrollTbody.appendChild(tr); }); }
+    function delPayroll(id){ if(!confirm('Delete payroll?')) return; store.payroll=store.payroll.filter(p=>p.id!==id); save(); }
+
+    // ---------- Charts & Stats ----------
+    let attChart,siChart;
+    function renderStats(){ document.getElementById('statEmployees').textContent=store.employees.length; const today=new Date().toISOString().slice(0,10); document.getElementById('statPresent').textContent=store.attendance.filter(a=>a.date===today && a.status==='Present').length; const ym=new Date().toISOString().slice(0,7); document.getElementById('statPayout').textContent=currency(store.payroll.filter(p=>p.month===ym).reduce((s,x)=>s+Number(x.net||0),0)); if(store.salesInv.length===0){ const now=new Date(); for(let i=6;i>=0;i--){ const d=new Date(now); d.setDate(now.getDate()-i); store.salesInv.push({date:d.toISOString().slice(0,10),sales:40+Math.round(Math.random()*60),inventory:80+Math.round(Math.random()*60)});} }
+      const last=store.salesInv.at(-1)||{sales:0,inventory:1}; document.getElementById('statIndex').textContent=Math.round((last.sales/Math.max(1,last.inventory))*100)+'%';
+      const labels=[...Array(30)].map((_,i)=>{const d=new Date(); d.setDate(d.getDate()-(29-i)); return d.toISOString().slice(0,10);}); const data=labels.map(d=>store.attendance.filter(a=>a.date===d && a.status==='Present').length);
+      if(attChart) attChart.destroy(); attChart=new Chart(document.getElementById('attendanceChart'),{type:'line',data:{labels,datasets:[{label:'Present',data,tension:0.35,fill:false}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+      const l2=store.salesInv.map(x=>x.date), sData=store.salesInv.map(x=>x.sales), iData=store.salesInv.map(x=>x.inventory); if(siChart) siChart.destroy(); siChart=new Chart(document.getElementById('salesInvChart'),{type:'bar',data:{labels:l2,datasets:[{label:'Sales',data:sData},{label:'Inventory',data:iData}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}});
+    }
+
+    // ---------- Export helpers ----------
+    function exportTableTo(which,type){ const map={employees:{id:'employeesTable',title:'Employees'},attendance:{id:'attendanceTable',title:'Attendance'},payroll:{id:'payrollTable',title:'Payroll'}}; const meta=map[which]; if(!meta) return; const table=document.getElementById(meta.id); if(type==='pdf') return exportPDF(meta.title+' Report',table); if(type==='excel') return exportExcel(meta.title+' Report',table); }
+    async function exportPDF(title,tableEl){ const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:'pt',format:'a4'}); doc.setFontSize(16); doc.text(title,40,40); doc.setFontSize(10); doc.text(new Date().toLocaleString(),40,58); doc.autoTable({html:tableEl,startY:75,styles:{fontSize:9}}); doc.save(title.replaceAll(' ','_')+'.pdf'); }
+    function exportExcel(title,tableEl){ const wb=XLSX.utils.book_new(); const ws=XLSX.utils.table_to_sheet(tableEl); XLSX.utils.book_append_sheet(wb,ws,'Report'); XLSX.writeFile(wb,title.replaceAll(' ','_')+'.xlsx'); }
+    document.getElementById('exportAllPdfBtn').addEventListener('click',()=>{ const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:'pt',format:'a4'}); const sections=[{title:'Employees',el:document.getElementById('employeesTable')},{title:'Attendance',el:document.getElementById('attendanceTable')},{title:'Payroll',el:document.getElementById('payrollTable')}]; let y=40; sections.forEach((s,idx)=>{ doc.setFontSize(16); doc.text(s.title,40,y); doc.autoTable({html:s.el,startY:y+15,styles:{fontSize:9}}); y=doc.lastAutoTable.finalY+30; if(idx<sections.length-1 && y>700){doc.addPage(); y=40;} }); doc.save('HRM_Combined_Report.pdf'); });
+    document.getElementById('exportAllExcelBtn').addEventListener('click',()=>{ const wb=XLSX.utils.book_new(); const s1=XLSX.utils.table_to_sheet(document.getElementById('employeesTable')); XLSX.utils.book_append_sheet(wb,s1,'Employees'); const s2=XLSX.utils.table_to_sheet(document.getElementById('attendanceTable')); XLSX.utils.book_append_sheet(wb,s2,'Attendance'); const s3=XLSX.utils.table_to_sheet(document.getElementById('payrollTable')); XLSX.utils.book_append_sheet(wb,s3,'Payroll'); XLSX.writeFile(wb,'HRM_Combined_Report.xlsx'); });
+
+    // ---------- Utilities & init ----------
+    function renderAll(){ renderEmployees(); renderAttendance(); renderPayroll(); renderStats(); }
+    document.getElementById('resetBtn').addEventListener('click',()=>{ if(!confirm('Clear demo data?')) return; store.employees=[]; store.attendance=[]; store.payroll=[]; store.salesInv=[]; save(); });
+    document.getElementById('seedDemoBtn').addEventListener('click',()=>{ if(store.employees.length>0){alert('Data exists - reset first.'); return;} const emps=[{name:'Hassan Ali Khan',email:'hassan@company.com',phone:'0300-0000001',department:'Tech',role:'Engineer',salary:120000},{name:'Sidra Jamil',email:'sidra@company.com',phone:'0300-0000002',department:'HR',role:'HR Manager',salary:90000},{name:'Noman Nawaz',email:'noman@company.com',phone:'0300-0000003',department:'Sales',role:'Sales Exec',salary:80000}]; emps.forEach(e=>store.employees.push({id:crypto.randomUUID(),joinDate:'2024-01-01',...e})); for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const date=d.toISOString().slice(0,10); store.employees.forEach(emp=>{ const statusPool=['Present','Present','Present','Leave','Absent']; const status=statusPool[Math.floor(Math.random()*statusPool.length)]; const hours=status==='Present'?7+Math.round(Math.random()*2):0; store.attendance.push({id:crypto.randomUUID(),date,employeeId:emp.id,status,hours});});} const ym=new Date().toISOString().slice(0,7); store.employees.forEach(emp=>{ const bonus=Math.round(Math.random()*10000); const deductions=Math.round(Math.random()*5000); const otPay=Math.round(Math.random()*4000); const net=emp.salary+bonus+otPay-deductions; store.payroll.push({id:crypto.randomUUID(),employeeId:emp.id,month:ym,base:emp.salary,bonus,deductions,otHours:0,otRate:0,otPay,net});}); save(); });
+
+    yearNow.textContent=new Date().getFullYear(); renderAll();
+  </script>
+  <!-- FOOTER -->
+<footer style="background:#2c3e50; color:white; padding:40px 20px; margin-top:50px;">
+  <div style="max-width:1100px; margin:auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:30px;">
+    
+    <!-- About -->
+    <div>
+      <h3 style="margin-bottom:15px; color:#1abc9c;">About Us</h3>
+      <p style="line-height:1.6; color:#bdc3c7;">
+        We provide high-quality products and services designed to meet your everyday needs. Your satisfaction is our top priority.
+      </p>
+    </div>
+
+    <!-- Quick Links -->
+    <div>
+      <h3 style="margin-bottom:15px; color:#1abc9c;">Quick Links</h3>
+      <ul style="list-style:none; padding:0; line-height:2;">
+         <li><a href="#home" style="color:white; text-decoration:none;">Home</a></li>
+        <li><a href="#invontery" style="color:white; text-decoration:none;">Inventory</a></li>
+        <li><a href="#sales" style="color:white; text-decoration:none;">Sales</a></li>
+        <li><a href="#hrm" style="color:white; text-decoration:none;">Hrm</a></li>
+         <li><a href="#contact" style="color:white; text-decoration:none;">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact Info -->
+    <div>
+      <h3 style="margin-bottom:15px; color:#1abc9c;">Contact Us</h3>
+      <p style="margin:5px 0;">📍 123 Business Street, City</p>
+      <p style="margin:5px 0;">📞 +123 456 7890</p>
+      <p style="margin:5px 0;">✉ support@company.com</p>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div style="text-align:center; margin-top:30px; font-size:14px; color:#bdc3c7;">
+    © 2025 Your Company Name. All Rights Reserved.
+  </div>
+</footer>
+ 
+
+</body>
+</html>

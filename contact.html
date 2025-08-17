@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP System - Contact</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+  // Check if user is logged in
+  const session = JSON.parse(localStorage.getItem('um_session_v1'));
+  if(!session){
+    alert("You must login first!");
+    window.location.href = "login.html"; // redirect to login page
+  }
+</script>
+
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      height: 100%;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Full screen Google Map background */
+    #map-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      pointer-events: none;
+      filter: brightness(0.6);
+    }
+
+    /* Animated background overlay (gradient & lightning effect) */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1a1a2e, #162447);
+      animation: bgColorChange 20s infinite alternate, lightning 2s infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes bgColorChange {
+      0% { background: linear-gradient(135deg, #1a1a2e, #162447); }
+      25% { background: linear-gradient(135deg, #ff5f6d, #ffc371); }
+      50% { background: linear-gradient(135deg, #43cea2, #185a9d); }
+      75% { background: linear-gradient(135deg, #f7971e, #ffd200); }
+      100% { background: linear-gradient(135deg, #ff7e5f, #feb47b); }
+    }
+
+    @keyframes lightning {
+      0%, 100% { opacity: 0; }
+      45% { opacity: 0.3; }
+      50% { opacity: 0; }
+      55% { opacity: 0.4; }
+    }
+
+    /* Glowing effect around contact form with changing colors */
+    .glow-box {
+      position: relative;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 800px;
+      width: 90%;
+      box-shadow: 0 0 20px #00FFFF;
+      animation: colorGlow 4s infinite alternate;
+      z-index: 10;
+    }
+
+    @keyframes colorGlow {
+      0% { box-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF; }
+      20% { box-shadow: 0 0 20px #FF00FF, 0 0 40px #FF00FF; }
+      40% { box-shadow: 0 0 20px #FFFF00, 0 0 40px #FFFF00; }
+      60% { box-shadow: 0 0 20px #FF0000, 0 0 40px #FF0000; }
+      80% { box-shadow: 0 0 20px #00FF00, 0 0 40px #00FF00; }
+      100% { box-shadow: 0 0 20px #00FFFF, 0 0 40px #00FFFF; }
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      transition: background 0.3s;
+    }
+
+    header:hover {
+      background: #1f2a38;
+    }
+
+    main {
+      position: relative;
+      z-index: 10;
+      padding-top: 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3rem;
+    }
+
+    footer {
+      position: relative;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Google Map Full Background -->
+  <iframe id="map-bg"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3168.988184902174!2d-122.08424948469106!3d37.42206577982566!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x808fb5d69d65e8b5%3A0x4f82439b6d5e3d2a!2sGoogleplex!5e0!3m2!1sen!2sus!4v1692291234567!5m2!1sen!2sus"
+    frameborder="0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+  </iframe>
+
+  <!-- NAVBAR -->
+<header class="bg-[#2C3E50] rounded-b-2xl shadow-md fixed w-full z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 relative">
+    <!-- Logo Centered -->
+    <div class="flex justify-center">
+      <div class="text-2xl font-bold text-white tracking-wider">ERP</div>
+    </div>
+
+    <!-- Desktop Menu Centered -->
+    <nav class="hidden sm:flex justify-center gap-8 mt-4">
+      <a href="index.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition">Dashboard</a>
+      <a href="home.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition">Home</a>
+      <a href="invontery.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition">Inventory</a>
+      <a href="sales.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition">Sales</a>
+      <a href="hrm.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition">HRM</a>
+      <a href="contact.html" class="nav-btn px-4 py-2 rounded-xl text-sm font-medium text-white hover:text-green-500 transition">Contact</a>
+    </nav>
+
+    <!-- Mobile Hamburger (top-right) -->
+    <div class="sm:hidden absolute right-4 top-3">
+      <button id="mobileBtn" class="p-2 rounded-md text-white hover:bg-gray-700 focus:outline-none">
+        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+<div id="mobileMenu" class="hidden sm:hidden bg-[#2C3E50] flex-col p-4 gap-2 absolute right-4 top-14 rounded-lg shadow-md">
+  <a href="home.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">Home</a>
+  <a href="invontery.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">Inventory</a>
+  <a href="sales.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">Sales</a>
+  <a href="hrm.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">HRM</a>
+  <a href="contact.html" class="block px-3 py-2 rounded-md text-white hover:text-green-500 transition">Contact</a>
+</div>
+
+
+  <script>
+    // Mobile menu toggle
+    const mobileBtn = document.getElementById('mobileBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    mobileBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  </script>
+</header>
+
+  <main>
+
+    <!-- Contact Info + Form -->
+    <div class="glow-box flex flex-col md:flex-row gap-8 items-start justify-center">
+      <!-- Contact Info -->
+      <div class="flex-1 space-y-4">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4">Contact Information</h2>
+        <p class="text-gray-600">You can reach us via the following:</p>
+        <p class="text-gray-600"><strong>Address:</strong> 123 ERP St, Tech City, USA</p>
+        <p class="text-gray-600"><strong>Email:</strong> support@erp.com</p>
+        <p class="text-gray-600"><strong>Phone:</strong> +1 234 567 8900</p>
+        <p class="text-gray-600"><strong>Office Hours:</strong> Mon-Fri 9am-6pm</p>
+      </div>
+
+      <!-- Contact Form -->
+      <form action="#" method="POST" class="flex-1 space-y-4 w-full">
+        <h2 class="text-3xl font-bold text-gray-800 mb-4 text-center md:text-left">Send a Message</h2>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <input type="text" name="name" placeholder="Your Name" class="flex-1 px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:outline-none">
+          <input type="email" name="email" placeholder="Your Email" class="flex-1 px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:outline-none">
+        </div>
+        <input type="text" name="subject" placeholder="Subject" class="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:outline-none">
+        <textarea name="message" placeholder="Your Message" rows="5" class="w-full px-4 py-2 rounded-xl border border-gray-300 focus:ring-2 focus:ring-gray-400 focus:outline-none"></textarea>
+        <button type="submit" class="w-full bg-[#2C3E50] text-white font-medium py-2 rounded-xl hover:bg-green-500 transition duration-300">Send Message</button>
+      </form>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#2C3E50] text-white py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between gap-8">
+      <div class="space-y-2">
+        <h3 class="font-bold text-lg">ERP System</h3>
+        <p>123 ERP St, Tech City, USA</p>
+        <p>support@erp.com</p>
+        <p>+1 234 567 8900</p>
+      </div>
+      <div class="space-y-2">
+        <h3 class="font-bold text-lg">Quick Links</h3>
+        <ul>
+          <li><a href="home.html" class="hover:text-green-500 transition">Home</a></li>
+          <li><a href="inventory.html" class="hover:text-green-500 transition">Inventory</a></li>
+          <li><a href="sales.html" class="hover:text-green-500 transition">Sales</a></li>
+          <li><a href="hrm.html" class="hover:text-green-500 transition">HRM</a></li>
+          <li><a href="contact.html" class="hover:text-green-500 transition">Contact</a></li>
+        </ul>
+      </div>
+      <div class="space-y-2">
+        <h3 class="font-bold text-lg">Follow Us</h3>
+        <div class="flex gap-3">
+          <a href="#" class="hover:text-green-500 transition">Facebook</a>
+          <a href="#" class="hover:text-green-500 transition">Twitter</a>
+          <a href="#" class="hover:text-green-500 transition">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-4">&copy; 2025 ERP System. All rights reserved.</div>
+  </footer>
+
+</body>
+</html>

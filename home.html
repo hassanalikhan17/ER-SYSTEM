@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP System - Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  // Check if user is logged in
+  const session = JSON.parse(localStorage.getItem('um_session_v1'));
+  if(!session){
+    alert("You must login first!");
+    window.location.href = "login.html"; // redirect to login page
+  }
+</script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #34495e, #2c3e50);
+      color: #fff;
+      background-size: 400% 400%;
+      animation: gradient 12s ease infinite;
+      scroll-behavior: smooth;
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Animations */
+    .fade-in { 
+      opacity: 0; 
+      transform: translateY(30px); 
+      animation: fadeInUp 1s ease forwards; 
+    }
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .zoom-hover {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .zoom-hover:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+   .navbar {
+  background: rgba(0,0,0,0.6);
+  padding: 15px 20px;
+  display: flex;
+  flex-direction: column;   /* ✅ stack items vertically */
+  align-items: flex-start;  /* ✅ keep logo on left */
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+    .nav-links {
+  display: flex;
+  gap: 30px;
+  justify-content: center; /* ✅ center menu */
+  width: 100%;             /* ✅ span full width */
+  margin-top: 10px;        /* ✅ spacing below logo */
+}
+
+    .nav-links a:hover { color: #1abc9c; }
+    .nav-toggle {
+      display: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: white;
+      position: absolute;
+      right: 20px;
+    }
+    @media(max-width: 768px) {
+      .nav-links {
+        flex-direction: column;
+        background: #2c3e50;
+        position: absolute;
+        top: 60px;
+        width: 100%;
+        left: 0;
+        display: none;
+        text-align: center;
+        padding: 20px 0;
+      }
+      .nav-links.active { display: flex; }
+      .nav-toggle { display: block; }
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 100px 20px;
+      animation: fadeInUp 1.5s ease forwards;
+    }
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+      color: #1abc9c;
+    }
+    .hero p {
+      font-size: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    /* Features Section */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      padding: 60px 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .feature-card {
+      background: white;
+      color: #2c3e50;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .feature-card h3 { margin: 10px 0; color: #1abc9c; }
+
+    /* Product Section */
+    .products {
+      background: rgba(255,255,255,0.05);
+      padding: 60px 20px;
+    }
+    .products h2 {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 40px;
+      color: #1abc9c;
+    }
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .product-card {
+      background: white;
+      color: #2c3e50;
+      border-radius: 12px;
+      overflow: hidden;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .product-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .product-card h4 { margin: 15px 0 5px; color: #1abc9c; }
+    .product-card p { margin: 5px 15px 20px; }
+
+    /* Charts Section */
+    .charts {
+      padding: 60px 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    .charts h2 {
+      text-align: center;
+      font-size: 36px;
+      margin-bottom: 40px;
+      color: #1abc9c;
+    }
+    .chart-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+    .chart-box {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    /* Footer */
+    footer {
+      background: #2c3e50;
+      text-align: center;
+      padding: 20px;
+      margin-top: 50px;
+    }
+    
+
+/* Whole Section Slide Down */
+.hero {
+  opacity: 0;
+  transform: translateY(-80px); /* start from above */
+  animation: sectionSlideDown 1.5s ease-out forwards;
+}
+
+@keyframes sectionSlideDown {
+  from { opacity: 0; transform: translateY(-80px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero h1 {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.hero p {
+  font-size: 1.2rem;
+}
+
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar" style="position:relative; display:flex; align-items:center; justify-content:space-between; padding:0 20px;">
+  
+  <!-- Logo top-left -->
+<div style="position:absolute; top:10px; left:10px; display:flex; align-items:center; gap:10px;">
+<img src="erp-vector-icon-web_116137-3113.avif" 
+     alt="ERP Logo" 
+     style="width:90px; height:90px; border-radius:15px; box-shadow:0 0 10px rgba(255,255,255,0.5);">
+
+</div>
+
+<!-- Heading slightly below -->
+<h1 style="color:white; font-size:1.8rem; margin-top:40px; text-align:center; font-weight:bold;">
+  ERP System
+</h1>
+
+  
+ <!-- Menu links -->
+<div class="nav-links" id="nav-menu" style="background-color:#2f2f2f; color:white; padding:10px; text-align:center;">
+  <a href="index.html" style="color:white; text-decoration:none; margin:0 10px;" onmouseover="this.style.color='limegreen'" onmouseout="this.style.color='white'">Dashboard</a>
+<a href="home.html" style="color:white; text-decoration:none; margin:0 10px;" onmouseover="this.style.color='limegreen'" onmouseout="this.style.color='white'">Home</a>
+<a href="invontery.html" style="color:white; text-decoration:none; margin:0 10px;" onmouseover="this.style.color='limegreen'" onmouseout="this.style.color='white'">Inventory</a>
+<a href="sales.html" style="color:white; text-decoration:none; margin:0 10px;" onmouseover="this.style.color='limegreen'" onmouseout="this.style.color='white'">Sales</a>
+<a href="hrm.html" style="color:white; text-decoration:none; margin:0 10px;" onmouseover="this.style.color='limegreen'" onmouseout="this.style.color='white'">HRM</a>
+<a href="contact.html" style="color:white; text-decoration:none; margin:0 10px;" onmouseover="this.style.color='limegreen'" onmouseout="this.style.color='white'">Contact</a>
+
+</div>
+
+
+  <span class="nav-toggle" onclick="toggleMenu()">&#9776;</span>
+</nav>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('nav-menu').classList.toggle('show');
+  }
+</script>
+
+<!-- Hero Section -->
+<section id="home" class="hero-section">
+</section>
+
+<style>
+.hero-section {
+  background: url('HD-wallpaper-secured-erp-system-erp-2-e-business-global-erp-systems-cyber-security-services.jpg') 
+              center/cover no-repeat;
+  height: 70vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+
+  /* Animation settings */
+  animation: heroAnimation 2.5s ease-out forwards;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  opacity: 0;
+}
+
+/* Animation Keyframes */
+@keyframes heroAnimation {
+  0% {
+    opacity: 0;
+    transform: scale(1.2) rotateX(15deg) translateY(-50px);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05) rotateX(7deg) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateX(0) translateY(0);
+  }
+}
+
+/* Mobile View - Show full image without cropping */
+@media (max-width: 768px) {
+  .hero-section {
+    background-size: contain;
+    background-color: #000; /* fallback background */
+  }
+}
+</style>
+
+
+
+
+
+
+
+<!-- Unique Features Section -->
+<section class="features fade-in">
+  <div class="feature-card zoom-hover">
+    <div class="icon">⚡</div>
+    <h3>Real-Time Insights</h3>
+    <p>Access live dashboards with instant updates on key metrics.</p>
+  </div>
+  <div class="feature-card zoom-hover">
+    <div class="icon">🔒</div>
+    <h3>Advanced Security</h3>
+    <p>End-to-end encryption and multi-layer authentication for safety.</p>
+  </div>
+  <div class="feature-card zoom-hover">
+    <div class="icon">🌐</div>
+    <h3>Cloud Integration</h3>
+    <p>Seamless access from anywhere with cloud-based scalability.</p>
+  </div>
+  <div class="feature-card zoom-hover">
+    <div class="icon">🤖</div>
+    <h3>AI Automation</h3>
+    <p>Boost productivity with automated workflows powered by AI.</p>
+  </div>
+</section>
+
+<style>
+/* Features Layout - Updated */
+.<!-- Unique Features Section -->
+<section class="features fade-in">
+  <h2 class="features-heading">Unique Features</h2>
+  <div class="features-wrapper">
+    <div class="feature-card zoom-hover">
+      <div class="icon">⚡</div>
+      <h3>Real-Time Insights</h3>
+      <p>Access live dashboards with instant updates on key metrics.</p>
+    </div>
+    <div class="feature-card zoom-hover">
+      <div class="icon">🔒</div>
+      <h3>Advanced Security</h3>
+      <p>End-to-end encryption and multi-layer authentication for safety.</p>
+    </div>
+    <div class="feature-card zoom-hover">
+      <div class="icon">🌐</div>
+      <h3>Cloud Integration</h3>
+      <p>Seamless access from anywhere with cloud-based scalability.</p>
+    </div>
+    <div class="feature-card zoom-hover">
+      <div class="icon">🤖</div>
+      <h3>AI Automation</h3>
+      <p>Boost productivity with automated workflows powered by AI.</p>
+    </div>
+  </div>
+</section>
+
+<style>
+/* Features Section */
+.features {
+  padding: 60px 10%;
+  background: linear-gradient(135deg, #e3f2fd, #ffffff);
+}
+
+/* Heading */
+.features-heading {
+  text-align: center;
+  color: #2C3E50;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 40px;
+}
+
+/* Flex Wrapper for Cards */
+.features-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 25px;
+}
+
+/* Feature Card */
+.feature-card {
+  flex: 1 1 calc(25% - 20px);
+  min-width: 220px;
+  max-width: 300px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 30px 20px;
+  text-align: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Icon & Hover */
+.feature-card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(120deg, rgba(0,123,255,0.1), rgba(0,255,200,0.1));
+  transform: rotate(25deg);
+  transition: opacity 0.4s ease;
+  opacity: 0;
+}
+.feature-card:hover::before { opacity: 1; }
+.feature-card .icon {
+  font-size: 40px;
+  margin-bottom: 15px;
+  display: inline-block;
+  color: #2C3E50;
+  transition: transform 0.6s ease, color 0.3s ease;
+}
+.feature-card:hover {
+  transform: translateY(-10px) rotateX(8deg) rotateY(-6deg) scale(1.05);
+  box-shadow: 0 15px 25px rgba(0,0,0,0.15);
+}
+.feature-card:hover .icon {
+  transform: rotateY(360deg);
+  color: #007BFF;
+}
+.feature-card h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #2C3E50;
+  font-weight: 600;
+}
+.feature-card p {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width:1024px){
+  .feature-card { flex: 1 1 calc(50% - 20px); }
+}
+@media (max-width:640px){
+  .feature-card { flex: 1 1 100%; }
+}
+</style>
+
+
+
+
+
+<!-- Products Section -->
+<section class="products fade-in">
+  <h2>Our Featured Modules</h2>
+  <div class="product-grid">
+    <div class="product-card zoom-hover">
+      <img src="images (5).jpg" alt="Inventory">
+      <h4>Inventory Module</h4>
+      <p>Manage stock levels, warehouses, and suppliers.</p>
+    </div>
+    <div class="product-card zoom-hover">
+      <img src="images (6).jpg" alt="Sales">
+      <h4>Sales Module</h4>
+      <p>Track sales, invoices, and customer transactions.</p>
+    </div>
+    <div class="product-card zoom-hover">
+      <img src="what-is-the-difference-between-erp-and-hrms.jpg" alt="HRM">
+      <h4>HRM Module</h4>
+      <p>Employee data, payroll, and attendance management.</p>
+    </div>
+    <div class="product-card zoom-hover">
+      <img src="images (7).jpg" alt="Reports">
+      <h4>Reports Module</h4>
+      <p>Generate detailed reports and business insights.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Charts Section -->
+<section class="charts fade-in">
+  <h2>Customer Reviews & Insights</h2>
+  <div class="chart-container">
+    <div class="chart-box zoom-hover">
+      <canvas id="barChart"></canvas>
+    </div>
+    <div class="chart-box zoom-hover">
+      <canvas id="pieChart"></canvas>
+    </div>
+    <div class="chart-box zoom-hover">
+      <canvas id="lineChart"></canvas>
+    </div>
+  </div>
+</section>
+<!-- Customer Contact Section -->
+<section class="customers" style="padding:60px 20px; background:#f9f9f9;">
+  <h2 style="text-align:center; color:#1abc9c; margin-bottom:40px; font-size:2rem;">Customer Contacts</h2>
+  
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px; max-width:1100px; margin:auto;">
+    
+    <!-- Contact Card -->
+    <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center;">
+      <img src="images (8).jpg" alt="John Smith" style="width:120px; height:120px; border-radius:50%; margin-bottom:15px;">
+      <h3 style="margin:10px 0; color:#2c3e50;">John Smith</h3>
+      <p style="margin:5px 0; color:#7f8c8d;">CTO</p>
+      <p style="margin:5px 0; color:#7f8c8d;">📞 +1 234 567 890</p>
+      <p style="margin:5px 0; color:#7f8c8d;">✉️ john.smith@techvision.com</p>
+    </div>
+
+    <!-- Contact Card -->
+    <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center;">
+      <img src="images (9).jpg" alt="Sarah Johnson" style="width:120px; height:120px; border-radius:50%; margin-bottom:15px;">
+      <h3 style="margin:10px 0; color:#2c3e50;">Sarah Johnson</h3>
+      <p style="margin:5px 0; color:#7f8c8d;">Operations Manager</p>
+      <p style="margin:5px 0; color:#7f8c8d;">📞 +44 123 456 789</p>
+      <p style="margin:5px 0; color:#7f8c8d;">✉️ sarah.j@greenmart.co.uk</p>
+    </div>
+
+    <!-- Contact Card -->
+    <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center;">
+      <img src="9994974a7e50d5bfdffe9d20ef275008.jpg" alt="Markus Weber" style="width:120px; height:120px; border-radius:50%; margin-bottom:15px;">
+      <h3 style="margin:10px 0; color:#2c3e50;">Markus Weber</h3>
+      <p style="margin:5px 0; color:#7f8c8d;">Project Director</p>
+      <p style="margin:5px 0; color:#7f8c8d;">📞 +49 987 654 321</p>
+      <p style="margin:5px 0; color:#7f8c8d;">✉️ markus.weber@buildpro.de</p>
+    </div>
+
+    <!-- Contact Card -->
+    <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center;">
+      <img src="smiling-girl-with-american-flag-nature_23-2147824508.avif" alt="Priya Mehta" style="width:120px; height:120px; border-radius:50%; margin-bottom:15px;">
+      <h3 style="margin:10px 0; color:#2c3e50;">Priya Mehta</h3>
+      <p style="margin:5px 0; color:#7f8c8d;">HR Head</p>
+      <p style="margin:5px 0; color:#7f8c8d;">📞 +91 98765 43210</p>
+      <p style="margin:5px 0; color:#7f8c8d;">✉️ priya.mehta@healthcareplus.in</p>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ERP Sales Insights Section -->
+<section class="sales fade-in" id="sales">
+  <h2 style="text-align:center; color:#1abc9c; margin:60px 0 30px;">ERP Sales Insights</h2>
+  <div class="chart-container" style="max-width:1200px; margin:auto;">
+    <div class="chart-box zoom-hover">
+      <canvas id="salesChart"></canvas>
+    </div>
+    <div class="chart-box zoom-hover">
+      <canvas id="moduleChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p>© 2025 ERP System. All Rights Reserved.</p>
+</footer>
+
+<script>
+  // Navbar toggle
+  const toggle = document.querySelector('.nav-toggle');
+  const links = document.querySelector('.nav-links');
+  toggle.addEventListener('click', () => {
+    links.classList.toggle('active');
+  });
+
+  // Chart.js animations included by default
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Excellent', 'Good', 'Average', 'Poor'],
+      datasets: [{
+        label: 'Customer Reviews',
+        data: [120, 90, 30, 10],
+        backgroundColor: ['#1abc9c', '#3498db', '#f39c12', '#e74c3c']
+      }]
+    },
+    options: { animation: { duration: 2000 } }
+  });
+
+  new Chart(document.getElementById('pieChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Positive', 'Neutral', 'Negative'],
+      datasets: [{ data: [70, 20, 10], backgroundColor: ['#1abc9c', '#f39c12', '#e74c3c'] }]
+    },
+    options: { animation: { animateScale: true, duration: 2000 } }
+  });
+
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        label: 'Customer Growth',
+        data: [50, 80, 120, 150, 200, 250],
+        borderColor: '#1abc9c',
+        backgroundColor: 'rgba(26, 188, 156, 0.2)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { animation: { duration: 2000 } }
+  });
+
+  new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: {
+      labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+      datasets: [{
+        label: 'Sales (in $K)',
+        data: [150, 200, 250, 300],
+        borderColor: '#3498db',
+        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: { animation: { duration: 2000 } }
+  });
+
+  new Chart(document.getElementById('moduleChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Inventory', 'Sales', 'HRM', 'Reports'],
+      datasets: [{
+        data: [40, 30, 20, 10],
+        backgroundColor: ['#1abc9c', '#3498db', '#f39c12', '#9b59b6']
+      }]
+    },
+    options: { animation: { animateScale: true, duration: 2000 } }
+  });
+</script>
+<!-- Products Section -->
+<section class="products" style="padding:60px 20px; background:#f4f7f9;">
+  <h2 style="text-align:center; color:#1abc9c; margin-bottom:40px; font-size:2rem;">Our Products</h2>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:25px; max-width:1100px; margin:auto;">
+
+    <!-- Product Card -->
+    <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center;">
+      <img src="XiaomiMiNotebookPro15-2021.jpg" alt="Laptop Pro" class="product-img">
+      <h3 style="margin:15px 0 5px; color:#2c3e50;">Laptop Pro 15</h3>
+      <p style="color:#7f8c8d; font-size:14px;">High-performance business laptop with Intel i7, 16GB RAM, and 512GB SSD.</p>
+      <p style="margin:10px 0; font-weight:bold; color:#27ae60;">$1,299</p>
+      <p style="margin:5px 0; color:#2980b9;">Stock: 25 Units</p>
+    </div>
+
+    <!-- Product Card -->
+    <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center;">
+      <img src="images (4).jpg" alt="Wireless Headphones" class="product-img">
+      <h3 style="margin:15px 0 5px; color:#2c3e50;">Wireless Headphones</h3>
+      <p style="color:#7f8c8d; font-size:14px;">Noise-cancelling Bluetooth headphones with 30 hours battery life.</p>
+      <p style="margin:10px 0; font-weight:bold; color:#27ae60;">$199</p>
+      <p style="margin:5px 0; color:#2980b9;">Stock: 60 Units</p>
+    </div>
+
+    <!-- Product Card -->
+    <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center;">
+      <img src="8396f664d08f3cc07874f9a199ee1ebb.jpg_720x720q80.jpg" alt="Office Chair" class="product-img">
+      <h3 style="margin:15px 0 5px; color:#2c3e50;">Ergonomic Office Chair</h3>
+      <p style="color:#7f8c8d; font-size:14px;">Comfortable adjustable chair with lumbar support for long working hours.</p>
+      <p style="margin:10px 0; font-weight:bold; color:#27ae60;">$299</p>
+      <p style="margin:5px 0; color:#2980b9;">Stock: 40 Units</p>
+    </div>
+
+    <!-- Product Card -->
+    <div style="background:white; padding:20px; border-radius:15px; box-shadow:0 6px 15px rgba(0,0,0,0.1); text-align:center;">
+      <img src="images (10).jpg" alt="Smartphone X" class="product-img">
+      <h3 style="margin:15px 0 5px; color:#2c3e50;">Smartphone X</h3>
+      <p style="color:#7f8c8d; font-size:14px;">Latest 5G smartphone with 128GB storage, AMOLED display, and 48MP camera.</p>
+      <p style="margin:10px 0; font-weight:bold; color:#27ae60;">$799</p>
+      <p style="margin:5px 0; color:#2980b9;">Stock: 80 Units</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Responsive Styles -->
+<style>
+  .product-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  /* Mobile fix: let images auto-resize */
+  @media (max-width: 600px) {
+    .product-img {
+      height: auto;
+      max-height: 250px;
+      object-fit: contain;
+    }
+  }
+</style>
+
+<!-- Cover / Footer Section -->
+<section style="background:linear-gradient(rgba(44,62,80,0.9), rgba(44,62,80,0.9)), url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80'); background-size:cover; background-position:center; color:white; padding:80px 20px; text-align:center; margin-top:60px;">
+
+  <h2 style="font-size:2.5rem; margin-bottom:20px; color:#1abc9c;">Ready to Transform Your Business?</h2>
+  <p style="max-width:700px; margin:0 auto 30px auto; font-size:1.1rem; line-height:1.6;">
+    Our ERP solutions are tailored to empower businesses with seamless operations, real-time insights, and future-ready technologies. Let’s shape success together.
+  </p>
+  
+  <!-- Call to Action Button -->
+  <a href="#contact" style="background:#1abc9c; padding:14px 28px; border-radius:30px; color:white; font-size:1rem; font-weight:600; text-decoration:none; transition:0.3s;">
+    Contact Us Today
+  </a>
+
+  <!-- Divider Line -->
+  <div style="height:2px; background:#16a085; width:80%; margin:50px auto;"></div>
+
+  <!-- Footer Details -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:30px; max-width:1100px; margin:auto; text-align:left;">
+
+    <!-- Company Info -->
+    <div>
+      <h3 style="color:#1abc9c; margin-bottom:10px;">ERP Solutions</h3>
+      <p style="line-height:1.6;">Delivering modern ERP software that adapts to your business needs, ensuring growth and efficiency at every step.</p>
+    </div>
+
+    <!-- Quick Links -->
+    <div>
+      <h3 style="color:#1abc9c; margin-bottom:10px;">Quick Links</h3>
+      <ul style="list-style:none; padding:0; margin:0; line-height:1.8;">
+        <li><a href="#home.html" style="color:white; text-decoration:none;">Home</a></li>
+        <li><a href="#invontery.html" style="color:white; text-decoration:none;">Inventory</a></li>
+        <li><a href="#sales.html" style="color:white; text-decoration:none;">Sales</a></li>
+        <li><a href="#hrm.html" style="color:white; text-decoration:none;">Hrm</a></li>
+         <li><a href="#contact.html" style="color:white; text-decoration:none;">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact Info -->
+    <div>
+      <h3 style="color:#1abc9c; margin-bottom:10px;">Contact Us</h3>
+      <p>Email: support@erpsolutions.com</p>
+      <p>Phone: +1 234 567 890</p>
+      <p>Address: 123 Business Park, NY, USA</p>
+    </div>
+
+    <!-- Social Media -->
+    <div>
+      <h3 style="color:#1abc9c; margin-bottom:10px;">Follow Us</h3>
+      <p>
+        <a href="#" style="color:white; margin-right:15px;">Facebook</a>
+        <a href="#" style="color:white; margin-right:15px;">LinkedIn</a>
+        <a href="#" style="color:white;">Twitter</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Bottom Line -->
+  <p style="margin-top:50px; font-size:0.9rem; color:#bdc3c7;">© 2025 ERP Solutions. All rights reserved.</p>
+
+</section>
+
+</body>
+</html>

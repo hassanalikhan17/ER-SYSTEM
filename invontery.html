@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERP Inventory Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<script>
+  // Check if user is logged in
+  const session = JSON.parse(localStorage.getItem('um_session_v1'));
+  if(!session){
+    alert("You must login first!");
+    window.location.href = "login.html"; // redirect to login page
+  }
+</script>
+
+<style>
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  /* Colorful animated gradient background */
+  background: linear-gradient(270deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb, #84fab0);
+  background-size: 1000% 1000%;
+  animation: gradientAnimation 20s ease infinite;
+}
+
+@keyframes gradientAnimation {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
+
+.navbar {background:#2c3e50; color:white; padding:15px 30px; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; position:sticky; top:0; z-index:100;}
+.navbar h1 {margin:0; font-size:28px; flex-basis:100%; text-align:center; margin-bottom:10px;}
+.nav-links {display:flex; gap:30px;}
+.nav-links a {color:white; text-decoration:none; font-weight:500; font-size:16px; transition:0.3s;}
+.nav-links a:hover {color:#2ecc71;}
+.nav-toggle {display:none; font-size:28px; cursor:pointer;}
+@media (max-width:768px) {
+  .nav-links {flex-direction:column; width:100%; display:none; margin-top:10px;}
+  .nav-links.active {display:flex;}
+  .nav-toggle {display:block; position:absolute; right:20px; top:15px;}
+}
+.container {max-width:1300px; margin:30px auto; padding:0 20px;}
+h2 {color:#2c3e50; margin-bottom:15px; border-bottom:2px solid #2c3e50; padding-bottom:5px;}
+.product-form {background:white; padding:25px; border-radius:12px; margin-bottom:25px; box-shadow:0 10px 20px rgba(0,0,0,0.1);}
+.product-form input {padding:12px; margin:8px 0; width:100%; border-radius:6px; border:1px solid #ccc;}
+.product-form button {padding:12px 25px; background:#27ae60; color:white; border:none; border-radius:6px; cursor:pointer; margin-top:10px; font-weight:600; transition:0.3s;}
+.product-form button:hover {background:#2ecc71;}
+table {width:100%; border-collapse:collapse; background:white; border-radius:12px; overflow:hidden; box-shadow:0 10px 20px rgba(0,0,0,0.1); margin-bottom:40px;}
+table th, table td {padding:14px; text-align:left; border-bottom:1px solid #ddd;}
+table th {background:#34495e; color:white; font-weight:600;}
+table img {width:60px; height:60px; object-fit:cover; border-radius:6px;}
+.action-btn {padding:6px 12px; border:none; border-radius:6px; cursor:pointer; margin-right:5px; font-weight:600;}
+.edit-btn {background:#2980b9; color:white;}
+.delete-btn {background:#c0392b; color:white;}
+.low-stock {background:#e74c3c; color:white; padding:5px 10px; border-radius:6px; font-weight:bold;}
+.import-export {margin-bottom:25px; display:flex; gap:12px;}
+.import-export button {padding:12px 20px; border:none; border-radius:6px; cursor:pointer; background:#8e44ad; color:white; font-weight:600;}
+.import-export button:hover {background:#9b59b6;}
+
+/* Product Grid Section */
+.product-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:25px; margin-bottom:40px;}
+.product-card {background:white; border-radius:12px; overflow:hidden; box-shadow:0 10px 20px rgba(0,0,0,0.15); transition:0.3s;}
+.product-card:hover {transform:translateY(-5px);}
+.product-card img {width:100%; height:150px; object-fit:cover;}
+.product-card .details {padding:15px;}
+.product-card .details h4 {margin:5px 0; color:#2c3e50;}
+.product-card .details p {margin:3px 0; color:#555;}
+.low-stock-card {color:#e74c3c; font-weight:bold;}
+</style>
+<script>
+  const toggle = document.querySelector('.nav-toggle');
+  const links = document.querySelector('.nav-links');
+
+  toggle.addEventListener('click', () => {
+    links.classList.toggle('active');
+  });
+</script>
+</head>
+<body>
+<nav class="navbar">
+  <h1>ERP</h1>
+  <span class="nav-toggle">&#9776;</span>
+  <div class="nav-links">
+    <a href="index.html">Dashboard</a>
+    <a href="home.html">Home</a>
+    <a href="invontery.html">Inventory</a>
+    <a href="sales.html">Sales</a>
+    <a href="hrm.html">HRM</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</nav>
+
+
+
+
+<div class="container">
+
+<!-- Product Grid Section -->
+<h2>Featured Products</h2>
+<div class="product-grid" id="productGrid"></div>
+
+<h2>Add Product</h2>
+<div class="product-form">
+<input type="text" id="addName" placeholder="Product Name">
+<input type="text" id="addSKU" placeholder="SKU">
+<input type="text" id="addCategory" placeholder="Category">
+<input type="number" id="addPrice" placeholder="Price">
+<input type="number" id="addStock" placeholder="Stock Quantity">
+<input type="text" id="addImage" placeholder="Image URL (example: https://via.placeholder.com/150)">
+<button onclick="addProduct()">Add Product</button>
+</div>
+
+<h2>Update Product</h2>
+<div class="product-form">
+<input type="hidden" id="updateIndex">
+<input type="text" id="updateName" placeholder="Product Name">
+<input type="text" id="updateSKU" placeholder="SKU">
+<input type="text" id="updateCategory" placeholder="Category">
+<input type="number" id="updatePrice" placeholder="Price">
+<input type="number" id="updateStock" placeholder="Stock Quantity">
+<input type="text" id="updateImage" placeholder="Image URL">
+<button onclick="updateProduct()">Update Product</button>
+</div>
+
+<h2>Delete Product</h2>
+<table id="deleteTable">
+<thead>
+<tr>
+<th>Image</th><th>Name</th><th>SKU</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="import-export">
+<input type="file" id="importFile">
+<button onclick="importCSV()">Import CSV</button>
+<button onclick="exportCSV()">Export CSV</button>
+</div>
+
+</div>
+
+<script>
+const navToggle=document.querySelector('.nav-toggle');
+const navLinks=document.querySelector('.nav-links');
+navToggle.addEventListener('click',()=>{navLinks.classList.toggle('active');});
+
+let products=[
+{name:'Smartphone',sku:'ELEC001',category:'Electronics',price:500,stock:10,image:'images (1).jpg'},
+{name:'T-Shirt',sku:'CLO001',category:'Clothing',price:20,stock:5,image:'tshirts.jpg'},
+{name:'Watch',sku:'ACC001',category:'Accessories',price:150,stock:2,image:'images (2).jpg'},
+{name:'Laptop',sku:'ELEC002',category:'Electronics',price:1200,stock:3,image:'images (3).jpg'},
+{name:'Headphones',sku:'ELEC003',category:'Electronics',price:80,stock:8,image:'images (4).jpg'}
+];
+
+function renderProductGrid(){
+const grid=document.getElementById('productGrid');
+grid.innerHTML='';
+products.forEach(p=>{
+grid.innerHTML+=`<div class="product-card">
+<img src="${p.image}">
+<div class="details">
+<h4>${p.name}</h4>
+<p>SKU: ${p.sku}</p>
+<p>Category: ${p.category}</p>
+<p>Price: $${p.price}</p>
+<p>Stock: ${p.stock<=5?'<span class="low-stock-card">'+p.stock+'</span>':p.stock}</p>
+</div></div>`;
+});
+}
+
+function addProduct(){
+const name=document.getElementById('addName').value;
+const sku=document.getElementById('addSKU').value;
+const category=document.getElementById('addCategory').value;
+const price=parseFloat(document.getElementById('addPrice').value);
+const stock=parseInt(document.getElementById('addStock').value);
+const image=document.getElementById('addImage').value;
+if(!name||!sku||!category||!price||!stock||!image){alert('Fill all fields'); return;}
+products.push({name,sku,category,price,stock,image});
+document.getElementById('addName').value=''; document.getElementById('addSKU').value=''; document.getElementById('addCategory').value='';
+document.getElementById('addPrice').value=''; document.getElementById('addStock').value=''; document.getElementById('addImage').value='';
+renderAll();
+}
+
+function editProduct(index){
+const p=products[index];
+document.getElementById('updateIndex').value=index;
+document.getElementById('updateName').value=p.name;
+document.getElementById('updateSKU').value=p.sku;
+document.getElementById('updateCategory').value=p.category;
+document.getElementById('updatePrice').value=p.price;
+document.getElementById('updateStock').value=p.stock;
+document.getElementById('updateImage').value=p.image;
+}
+
+function updateProduct(){
+const index=document.getElementById('updateIndex').value;
+const name=document.getElementById('updateName').value;
+const sku=document.getElementById('updateSKU').value;
+const category=document.getElementById('updateCategory').value;
+const price=parseFloat(document.getElementById('updatePrice').value);
+const stock=parseInt(document.getElementById('updateStock').value);
+const image=document.getElementById('updateImage').value;
+if(!name||!sku||!category||!price||!stock||!image){alert('Fill all fields'); return;}
+products[index]={name,sku,category,price,stock,image};
+document.getElementById('updateIndex').value='';
+document.getElementById('updateName').value=''; document.getElementById('updateSKU').value=''; document.getElementById('updateCategory').value='';
+document.getElementById('updatePrice').value=''; document.getElementById('updateStock').value=''; document.getElementById('updateImage').value='';
+renderAll();
+}
+
+function deleteProduct(index){if(confirm('Delete this product?')){products.splice(index,1); renderAll();}}
+
+function importCSV(){
+const file=document.getElementById('importFile').files[0]; if(!file){alert('Select CSV'); return;}
+const reader=new FileReader();
+reader.onload=function(e){const lines=e.target.result.split('\n').slice(1); lines.forEach(line=>{
+const [name,sku,category,price,stock,image]=line.split(',');
+if(name){products.push({name,sku,category,price:parseFloat(price),stock:parseInt(stock),image});}}); renderAll();};
+reader.readAsText(file);
+}
+
+function exportCSV(){let csv='Name,SKU,Category,Price,Stock,Image\n'; products.forEach(p=>{csv+=`${p.name},${p.sku},${p.category},${p.price},${p.stock},${p.image}\n`;}); const blob=new Blob([csv],{type:'text/csv'}); const link=document.createElement('a'); link.href=URL.createObjectURL(blob); link.download='products.csv'; link.click();}
+
+function renderDeleteTable(){
+const tbody=document.querySelector('#deleteTable tbody'); tbody.innerHTML='';
+products.forEach((p,i)=>{tbody.innerHTML+=`<tr>
+<td><img src="${p.image}"></td>
+<td>${p.name}</td>
+<td>${p.sku}</td>
+<td>${p.category}</td>
+<td>$${p.price}</td>
+<td>${p.stock<=5?'<span class="low-stock">'+p.stock+'</span>':p.stock}</td>
+<td><button class="action-btn delete-btn" onclick="deleteProduct(${i})">Delete</button></td>
+</tr>`;});}
+
+function renderAll(){renderProductGrid(); renderDeleteTable();}
+
+renderAll();
+
+</script>
+<!-- FOOTER -->
+<footer style="background:#2c3e50; color:white; padding:40px 20px; margin-top:50px;">
+  <div style="max-width:1100px; margin:auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:30px;">
+    
+    <!-- About -->
+    <div>
+      <h3 style="margin-bottom:15px; color:#1abc9c;">About Us</h3>
+      <p style="line-height:1.6; color:#bdc3c7;">
+        We provide high-quality products and services designed to meet your everyday needs. Your satisfaction is our top priority.
+      </p>
+    </div>
+
+    <!-- Quick Links -->
+    <div>
+      <h3 style="margin-bottom:15px; color:#1abc9c;">Quick Links</h3>
+      <ul style="list-style:none; padding:0; line-height:2;">
+         <li><a href="#home" style="color:white; text-decoration:none;">Home</a></li>
+        <li><a href="#invontery" style="color:white; text-decoration:none;">Inventory</a></li>
+        <li><a href="#sales" style="color:white; text-decoration:none;">Sales</a></li>
+        <li><a href="#hrm" style="color:white; text-decoration:none;">Hrm</a></li>
+         <li><a href="#contact" style="color:white; text-decoration:none;">Contact</a></li>
+      </ul>
+    </div>
+
+    <!-- Contact Info -->
+    <div>
+      <h3 style="margin-bottom:15px; color:#1abc9c;">Contact Us</h3>
+      <p style="margin:5px 0;">📍 123 Business Street, City</p>
+      <p style="margin:5px 0;">📞 +123 456 7890</p>
+      <p style="margin:5px 0;">✉ support@company.com</p>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div style="text-align:center; margin-top:30px; font-size:14px; color:#bdc3c7;">
+    © 2025 Your Company Name. All Rights Reserved.
+  </div>
+</footer>
+
+
+</body>
+</html>

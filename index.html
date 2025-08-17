@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>User Management — Professional Single Page</title>
+<style>
+  :root{
+    --card-w: 420px;
+    --accent-1: #06b6d4;
+    --accent-2: #8b5cf6;
+    --glass: rgba(255,255,255,0.06);
+    --muted: rgba(255,255,255,0.75);
+  }
+
+  /* Page background (soft animated gradient) */
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+  body{
+    display:flex;align-items:center;justify-content:center;
+    background: linear-gradient(120deg,#0f172a 0%, #061220 45%, #082033 100%);
+    color:#e6f3f7;
+    overflow:auto;
+  }
+  /* subtle animated overlay */
+  .bg-overlay{
+    position:fixed;inset:0;pointer-events:none;opacity:0.08;
+    background: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.18), transparent 8%),
+                radial-gradient(circle at 90% 80%, rgba(6,182,212,0.18), transparent 8%);
+    mix-blend-mode:screen;
+    animation: bgShift 14s ease-in-out infinite;
+  }
+  @keyframes bgShift{0%{transform:translateY(0)}50%{transform:translateY(8px)}100%{transform:translateY(0)}}
+
+  /* Center card */
+  .shell{width:100%;max-width:1100px;padding:28px;box-sizing:border-box;display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+  .left{
+    width:100%;max-width:var(--card-w);
+    position:relative;
+  }
+
+  /* Rotating gradient border (outer) */
+  .glow {
+    position:relative;border-radius:16px;padding:3px;
+    background:linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  }
+  .glow::before {
+    content:"";position:absolute;inset:-3px;border-radius:18px;z-index:-1;
+    background: conic-gradient(from 0deg, #ff0047, #ff8a00, #ffd500, #00d4ff, #7a00ff, #ff0047);
+    filter:blur(8px);opacity:0.95;
+    animation: spin 6s linear infinite;
+  }
+  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+  /* inner card */
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:13px;padding:22px;box-shadow:0 10px 40px rgba(2,6,23,0.6);
+    min-height:360px;
+  }
+
+  h1{margin:0 0 6px 0;font-size:18px;letter-spacing:0.2px}
+  p.lead{margin:0 0 18px 0;color:var(--muted);font-size:13px}
+
+  /* tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tabs button{
+    flex:1;padding:8px;border-radius:10px;border:0;background:transparent;color:var(--muted);
+    cursor:pointer;font-weight:600;
+  }
+  .tabs button.active{background:linear-gradient(90deg,var(--accent-1),var(--accent-2));color:#021020}
+
+  form{display:grid;gap:10px}
+  label{font-size:13px;color:var(--muted)}
+  input,select{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+  .row{display:flex;gap:8px}
+  .actions{display:flex;gap:8px;margin-top:8px}
+  button.primary{flex:1;background:linear-gradient(90deg,var(--accent-1),var(--accent-2));border:0;padding:10px 12px;border-radius:10px;color:#021020;font-weight:700;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px;border-radius:10px;color:var(--muted);cursor:pointer}
+
+  /* right panel: info & role view */
+  .right{width:320px;min-width:260px;max-width:360px}
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));padding:18px;border-radius:12px}
+  .profile-header{display:flex;gap:12px;align-items:center}
+  .avatar{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent-1),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#022331}
+  .small{font-size:13px;color:var(--muted)}
+
+  /* responsive */
+  @media (max-width:880px){.shell{padding:18px}.right{order:2;width:100%}.left{order:1;width:100%;max-width:100%}.card{min-height:unset}}
+
+  /* subtle focus */
+  input:focus,select:focus{outline:none;box-shadow:0 4px 14px rgba(8,20,40,0.2)}
+</style>
+</head>
+<body>
+  <div class="bg-overlay" aria-hidden></div>
+
+  <div class="shell" role="main">
+    <!-- left: single card with login/register toggles -->
+    <div class="left">
+      <div class="glow">
+        <div class="card" aria-labelledby="authTitle">
+          <h1 id="authTitle">LOGIN </h1>
+          <p class="lead"> Login & Register and User Profile Management — client-only demo.</p>
+
+          <div class="tabs" role="tablist">
+            <button id="tab-login" class="active" role="tab" aria-selected="true" onclick="switchTab('login')">Login</button>
+            <button id="tab-register" role="tab" aria-selected="false" onclick="switchTab('register')">Register</button>
+          </div>
+
+          <!-- LOGIN -->
+          <form id="form-login" onsubmit="event.preventDefault(); doLogin();" aria-hidden="false">
+            <label for="loginUser">Username or Email</label>
+            <input id="loginUser" autocomplete="username" required />
+            <div class="row">
+              <div style="flex:1">
+                <label for="loginPass">Password</label>
+                <input id="loginPass" type="password" autocomplete="current-password" required />
+              </div>
+              <div style="width:120px">
+                <label for="loginRole">Role</label>
+                <select id="loginRole" aria-label="role">
+                  <option>Employee</option><option>Manager</option><option>Admin</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit" class="primary">Login</button>
+              <button type="button" class="ghost" onclick="prefillDemo()">Demo</button>
+            </div>
+            <div style="margin-top:10px;font-size:13px;color:var(--muted)"> Use Register to create account.</div>
+          </form>
+
+          <!-- REGISTER -->
+          <form id="form-register" onsubmit="event.preventDefault(); doRegister();" style="display:none" aria-hidden="true">
+            <label for="regName">Full name</label>
+            <input id="regName" required />
+            <label for="regEmail">Email</label>
+            <input id="regEmail" type="email" autocomplete="email" required />
+            <label for="regPass">Password (min 4)</label>
+            <input id="regPass" type="password" minlength="4" required />
+            <label for="regRole">Role</label>
+            <select id="regRole">
+              <option>Employee</option><option>Manager</option><option>Admin</option>
+            </select>
+
+            <div class="actions">
+              <button type="submit" class="primary">Create account</button>
+              <button type="button" class="ghost" onclick="clearRegister()">Clear</button>
+            </div>
+            <div style="margin-top:10px;font-size:13px;color:var(--muted)">
+              After registration, login to access profile management.
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- right: profile / info -->
+    <aside class="right">
+      <div class="panel" id="welcomePanel">
+        <div class="profile-header">
+          <div class="avatar" id="avatarInitials">U</div>
+          <div>
+            <div style="font-weight:700" id="displayName">Not signed in</div>
+            <div class="small" id="displayEmail">—</div>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0" />
+
+        <div id="signedOutView">
+          <div class="small">Quick tips</div>
+          <ul style="margin:8px 0 0 18px;color:var(--muted)">
+            <li>Register to create an account.</li>
+            <li>Login to manage your profile and role-based view.</li>
+            <li>Demo credentials available with <em>Demo</em> button.</li>
+          </ul>
+        </div>
+
+        <div id="profileView" style="display:none">
+          <div style="margin-bottom:10px">
+            <label class="small">Name</label>
+            <input id="profile_name" />
+            <label class="small" style="margin-top:8px">Email</label>
+            <input id="profile_email" type="email" />
+            <label class="small" style="margin-top:8px">Role</label>
+            <select id="profile_role"><option>Employee</option><option>Manager</option><option>Admin</option></select>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="primary" onclick="saveProfile()">Save</button>
+            <button class="ghost" onclick="signOut()">Sign out</button>
+          </div>
+
+          <div style="margin-top:12px;font-size:13px;color:var(--muted)">
+            Role-based preview:
+            <div id="rolePreview" style="margin-top:8px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)">
+              — not available
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+<script>
+/* Simple client-only user system
+   - Stores users in localStorage.users (array)
+   - current session stored in localStorage.session {email, name, role, token}
+   - token simulated (base64)
+*/
+
+const LS_USERS = 'um_users_v1';
+const LS_SESSION = 'um_session_v1';
+
+/* util */
+function loadUsers(){ return JSON.parse(localStorage.getItem(LS_USERS) || '[]'); }
+function saveUsers(users){ localStorage.setItem(LS_USERS, JSON.stringify(users)); }
+function loadSession(){ return JSON.parse(localStorage.getItem(LS_SESSION) || 'null'); }
+function saveSession(s){ localStorage.setItem(LS_SESSION, JSON.stringify(s)); }
+function clearSession(){ localStorage.removeItem(LS_SESSION); }
+
+/* UI helpers */
+function switchTab(tab){
+  document.getElementById('form-login').style.display = tab==='login' ? '' : 'none';
+  document.getElementById('form-login').setAttribute('aria-hidden', tab==='login'?'false':'true');
+  document.getElementById('form-register').style.display = tab==='register' ? '' : 'none';
+  document.getElementById('form-register').setAttribute('aria-hidden', tab==='register'?'false':'true');
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+}
+
+/* Registration */
+function clearRegister(){
+  document.getElementById('regName').value='';
+  document.getElementById('regEmail').value='';
+  document.getElementById('regPass').value='';
+  document.getElementById('regRole').value='Employee';
+}
+function doRegister(){
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('regPass').value;
+  const role = document.getElementById('regRole').value;
+  if(!name || !email || !pass) return alert('Please fill all registration fields.');
+  if(pass.length < 4) return alert('Password must be at least 4 characters.');
+  const users = loadUsers();
+  if(users.find(u=>u.email===email)) return alert('An account with this email already exists.');
+  users.push({ name, email, pass, role });
+  saveUsers(users);
+  alert('Registered successfully — please login.');
+  switchTab('login');
+  // prefill login
+  document.getElementById('loginUser').value = email;
+  document.getElementById('loginRole').value = role;
+}
+
+/* Login */
+function doLogin(){
+  const userInput = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const roleSel = document.getElementById('loginRole').value;
+  if(!userInput || !pass) return alert('Please enter username/email and password.');
+  const users = loadUsers();
+  const user = users.find(u => (u.email===userInput.toLowerCase() || u.name===userInput) && u.pass===pass && u.role===roleSel);
+  if(!user) return alert('Credentials not found for selected role.');
+  const token = btoa(JSON.stringify({ email:user.email, t:Date.now() }));
+  const session = { name: user.name, email:user.email, role:user.role, token };
+  saveSession(session);
+  applySession(session);
+  alert('Login successful — welcome '+user.name);
+
+  // ✅ Redirect to home page after login
+  window.location.href = "home.html";
+}
+
+
+/* Prefill demo (creates demo users if missing) */
+function prefillDemo(){
+  let users = loadUsers();
+  const demo = [
+    { name:'Admin User', email:'admin@demo.local', pass:'admin123', role:'Admin' },
+    { name:'Manager User', email:'manager@demo.local', pass:'manager123', role:'Manager' },
+    { name:'Employee User', email:'employee@demo.local', pass:'employee123', role:'Employee' }
+  ];
+  let added = 0;
+  demo.forEach(d=>{
+    if(!users.find(u=>u.email===d.email)){
+      users.push(d); added++;
+    }
+  });
+  if(added>0) saveUsers(users);
+  // prefill login fields for quick demo use
+  document.getElementById('loginUser').value = 'admin@demo.local';
+  document.getElementById('loginPass').value = 'admin123';
+  document.getElementById('loginRole').value = 'Admin';
+  alert((added? 'Demo users added. ':'') + 'Fields prefilling ready.');
+}
+
+/* Session UI */
+function applySession(session){
+  // update right panel
+  document.getElementById('displayName').textContent = session.name;
+  document.getElementById('displayEmail').textContent = session.email;
+  document.getElementById('avatarInitials').textContent = initials(session.name);
+  // show profile view
+  document.getElementById('signedOutView').style.display = 'none';
+  document.getElementById('profileView').style.display = 'block';
+  document.getElementById('profile_name').value = session.name;
+  document.getElementById('profile_email').value = session.email;
+  document.getElementById('profile_role').value = session.role;
+  renderRolePreview(session.role);
+  // hide auth card (we keep tabs accessible)
+  // Optionally hide left card: here we keep it visible for relog/register
+}
+function initials(name){
+  return (name||'U').split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
+}
+function renderRolePreview(role){
+  const el = document.getElementById('rolePreview');
+  if(role==='Admin'){
+    el.innerHTML = '<strong>Admin view</strong><div style="margin-top:6px;color:var(--muted)">Access to all users & impersonation (demo).</div>';
+  } else if(role==='Manager'){
+    el.innerHTML = '<strong>Manager view</strong><div style="margin-top:6px;color:var(--muted)">Team reports & limited user controls.</div>';
+  } else {
+    el.innerHTML = '<strong>Employee view</strong><div style="margin-top:6px;color:var(--muted)">Personal dashboard & profile only.</div>';
+  }
+}
+
+/* Save profile changes (name/email/role) */
+function saveProfile(){
+  const name = document.getElementById('profile_name').value.trim();
+  const email = document.getElementById('profile_email').value.trim().toLowerCase();
+  const role = document.getElementById('profile_role').value;
+  if(!name || !email) return alert('Name & email required.');
+  const users = loadUsers();
+  // update user record (match by old session email)
+  const session = loadSession();
+  const idx = users.findIndex(u=>u.email===session.email);
+  if(idx===-1) return alert('User record not found.');
+  // ensure email uniqueness if changed
+  if(email !== session.email && users.find(u=>u.email===email)) return alert('Email already in use.');
+  users[idx].name = name; users[idx].email = email; users[idx].role = role;
+  saveUsers(users);
+  // update session
+  const newSession = { name, email, role, token: session.token };
+  saveSession(newSession);
+  applySession(newSession);
+  alert('Profile saved.');
+}
+
+/* Sign out */
+function signOut(){
+  clearSession();
+  document.getElementById('displayName').textContent = 'Not signed in';
+  document.getElementById('displayEmail').textContent = '—';
+  document.getElementById('avatarInitials').textContent = 'U';
+  document.getElementById('profileView').style.display = 'none';
+  document.getElementById('signedOutView').style.display = 'block';
+}
+
+/* On load: init UI state */
+(function init(){
+  // bind save button
+  window.saveProfile = saveProfile;
+  window.signOut = signOut;
+  window.doRegister = doRegister;
+  window.doLogin = doLogin;
+  window.prefillDemo = prefillDemo;
+  window.switchTab = switchTab;
+  // restore session if any
+  const session = loadSession();
+  if(session){
+    applySession(session);
+  } else {
+    // default to login tab
+    switchTab('login');
+  }
+})();
+</script>
+</body>
+</html>
